@@ -1,18 +1,16 @@
 'use strict';
-var express = require('express');
+var restify = require('restify');
 var routes = require('./routes/index');
 var path = require('path');
 var port = process.env.PORT || 3000;
 var pg = require('pg');
 var knex = require('./config').knex;
 var connectionString = require('./config').connectionString;
-var bodyParser = require('body-parser');
 
-var app = express();
-app.set('port', port);
-app.use('/', express.static(path.join(__dirname, 'public')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: true}));
+var app = restify.createServer({
+  name: 'backlogAPI'
+});
+
 
 app.post('/api/v1/items', function(req, res) {
 //curl -H "Content-Type: application/json" -X POST –d "{\"item\":\"cmd api\",\"story\": \"entered through commandline and api\"}" http://localhost:3000/api/v1/items
@@ -120,38 +118,37 @@ app.put('/api/v1/items/:item_id', function(req, res) {
     });
 });
 
-app.delete('/api/v1/items/:item_id', function(req, res) {
-    var results = [];
-    // Grab data from the URL parameters
-    var id = req.params.todo_id;
+// app.delete('/api/v1/items/:item_id', function(req, res) {
+//     var results = [];
+//     // Grab data from the URL parameters
+//     var id = req.params.todo_id;
+//
+//     // Get a Postgres client from the connection pool
+//     pg.connect(connectionString, function(err, client, done) {
+//
+//         // SQL Query > Delete Data
+//         client.query("DELETE FROM items WHERE id=($1)", [id]);
+//
+//         // SQL Query > Select Data
+//         var query = client.query("SELECT * FROM items ORDER BY id ASC");
+//
+//         // Stream results back one row at a time
+//         query.on('row', function(row) {
+//             results.push(row);
+//         });
+//
+//         // After all data is returned, close connection and return results
+//         query.on('end', function() {
+//             client.end();
+//             return res.json(results);
+//         });
+//
+//         // Handle Errors
+//         if(err) {
+//           console.log(err);
+//         }
+//     });
+// });
 
-    // Get a Postgres client from the connection pool
-    pg.connect(connectionString, function(err, client, done) {
-
-        // SQL Query > Delete Data
-        client.query("DELETE FROM items WHERE id=($1)", [id]);
-
-        // SQL Query > Select Data
-        var query = client.query("SELECT * FROM items ORDER BY id ASC");
-
-        // Stream results back one row at a time
-        query.on('row', function(row) {
-            results.push(row);
-        });
-
-        // After all data is returned, close connection and return results
-        query.on('end', function() {
-            client.end();
-            return res.json(results);
-        });
-
-        // Handle Errors
-        if(err) {
-          console.log(err);
-        }
-    });
-});
-
-app.listen(app.get('port'), function() {
-  console.log('Server started: http://localhost:' + app.get('port') + '/');
-});
+app.listen(port);
+console.log('Server started: http://localhost:' + port + '/');
