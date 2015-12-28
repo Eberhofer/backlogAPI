@@ -1,15 +1,15 @@
 'use strict';
-var restify = require('restify');
+var express = require('express');
 var routes = require('./routes/index');
 var path = require('path');
 var port = process.env.PORT || 3000;
 var pg = require('pg');
 var knex = require('./config').knex;
 var connectionString = require('./config').connectionString;
+//var bodyParser = require('body-parser');
 
-var app = restify.createServer({
-  name: 'backlogAPI'
-});
+var app = express();
+app.set('port', port);
 
 
 app.post('/api/v1/items', function(req, res) {
@@ -150,5 +150,6 @@ app.put('/api/v1/items/:item_id', function(req, res) {
 //     });
 // });
 
-app.listen(port);
-console.log('Server started: http://localhost:' + port + '/');
+app.listen(app.get('port'), function() {
+  console.log('Server started: http://localhost:' + app.get('port') + '/');
+});
